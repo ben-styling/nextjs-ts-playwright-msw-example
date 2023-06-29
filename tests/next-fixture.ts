@@ -1,7 +1,7 @@
 // tests/next-fixture.ts
 import { createServer, Server } from "http";
 import { parse } from "url";
-import { test as base } from "@playwright/test";
+import { expect, test as base } from "@playwright/test";
 import next from "next";
 import path from "path";
 import { AddressInfo } from "net";
@@ -71,7 +71,9 @@ const test = base.extend<
   rest,
   goto: async ({ app: { port }, page }, use) => {
     const goto = async (pathname: string) => {
-      await page.goto(`http://localhost:${port}${pathname}`);
+      const url = `http://localhost:${port}${pathname}`;
+      await page.goto(url);
+      await expect(page).toHaveURL(url);
     };
     await use(goto);
   },
