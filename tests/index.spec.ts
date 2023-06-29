@@ -70,7 +70,7 @@ test("book title3", async ({ page, goto, mockBook }) => {
   expect(name2).toBe("Lord of the Rings2");
 });
 
-test("reviews", async ({ page, port: [port], mockBook }) => {
+test("reviews", async ({ page, app: { port }, mockBook }) => {
   // mock the response of the server-side request
   await mockBook({
     title: "Lord of the Rings",

@@ -17,9 +17,9 @@ const test = base.extend<
     mockBook: (book: any) => Promise<void>;
     worker: MockServiceWorker;
   },
-  { port: [string, SetupServer] }
+  { app: { port: number; requestInterceptor: SetupServer } }
 >({
-  mockBook: async ({ port: [port, requestInterceptor] }, use) => {
+  mockBook: async ({ app: { requestInterceptor } }, use) => {
     const mockBook = async (book: any) => {
       requestInterceptor.use(
         rest.get(`*/b/AFRW`, (_req, res, ctx) => res.once(ctx.json(book)))
@@ -34,7 +34,7 @@ const test = base.extend<
     },
     { scope: "test", auto: true },
   ],
-  port: [
+  app: [
     async ({}, use) => {
       const { setupServer } = await import("msw/node");
       const servers: [Server, SetupServer] = await new Promise((resolve) => {
@@ -62,14 +62,14 @@ const test = base.extend<
       });
       const port = (servers[0].address() as AddressInfo).port;
       const requestInterceptor = servers[1];
-      await use([String(port), requestInterceptor]);
+      await use({ port, requestInterceptor });
       servers[0].close();
       servers[1].close();
     },
     { scope: "worker" },
   ],
   rest,
-  goto: async ({ port: [port], page }, use) => {
+  goto: async ({ app: { port }, page }, use) => {
     const goto = async (pathname: string) => {
       await page.goto(`http://localhost:${port}${pathname}`);
     };
