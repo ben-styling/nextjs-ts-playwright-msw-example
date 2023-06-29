@@ -19,7 +19,7 @@ export default function Home({
   const [reviews, setReviews] = useState<null | Review[]>(null);
 
   const handleGetReviews = () => {
-    fetch("/api/reviews")
+    fetch("/testing/api/reviews")
       .then((res) => res.json())
       .then(setReviews);
   };

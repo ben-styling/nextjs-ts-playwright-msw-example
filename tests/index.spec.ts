@@ -10,7 +10,7 @@ test("book title1", async ({ page, goto, mockBook }) => {
       "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
   });
 
-  await goto("/");
+  await goto("/testing");
   const name = await page.innerText("h1");
   expect(name).toBe("Lord of the Rings");
   await mockBook({
@@ -19,7 +19,7 @@ test("book title1", async ({ page, goto, mockBook }) => {
     description:
       "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
   });
-  await goto("/");
+  await goto("/testing");
   const name2 = await page.innerText("h1");
   expect(name2).toBe("Lord of the Rings2");
 });
@@ -33,7 +33,7 @@ test("book title2", async ({ page, goto, mockBook }) => {
       "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
   });
 
-  await goto("/");
+  await goto("/testing");
   const name = await page.innerText("h1");
   expect(name).toBe("Lord of the Rings");
   await mockBook({
@@ -42,7 +42,7 @@ test("book title2", async ({ page, goto, mockBook }) => {
     description:
       "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
   });
-  await goto("/");
+  await goto("/testing");
   const name2 = await page.innerText("h1");
   expect(name2).toBe("Lord of the Rings2");
 });
@@ -56,7 +56,7 @@ test("book title3", async ({ page, goto, mockBook }) => {
       "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
   });
 
-  await goto("/");
+  await goto("/testing");
   const name = await page.innerText("h1");
   expect(name).toBe("Lord of the Rings");
   await mockBook({
@@ -65,7 +65,7 @@ test("book title3", async ({ page, goto, mockBook }) => {
     description:
       "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
   });
-  await goto("/");
+  await goto("/testing");
   const name2 = await page.innerText("h1");
   expect(name2).toBe("Lord of the Rings2");
 });
@@ -80,7 +80,7 @@ test("reviews", async ({ page, app: { port }, mockBook }) => {
   });
 
   // mock the response to the client-side request
-  await page.route(`http://localhost:${port}/api/reviews`, (route) =>
+  await page.route(`http://localhost:${port}/testing/api/reviews`, (route) =>
     route.fulfill({
       status: 200,
       body: JSON.stringify([
@@ -93,7 +93,7 @@ test("reviews", async ({ page, app: { port }, mockBook }) => {
     })
   );
 
-  await page.goto(`http://localhost:${port}/`);
+  await page.goto(`http://localhost:${port}/testing/`);
   await page.click("button");
 
   const description = await page.innerText("ul li p");

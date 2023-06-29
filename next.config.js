@@ -15,6 +15,7 @@ const spreadWhen = (condition, data) => {
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  basePath: "/testing",
   async headers() {
     return [
       {

@@ -9,6 +9,7 @@
 /coverage
 public/mockServiceWorker.js
 test-results/**
+playwright-report/**
 
 # next.js
 /.next/
