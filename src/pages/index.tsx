@@ -1,7 +1,6 @@
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import { useState } from "react";
 import { getBook } from "src/server/getBook";
-import { redirect, typeSafeSSP } from "src/server/typesafeServerSideProps";
 
 export type Book = {
   imageUrl: string;
@@ -16,7 +15,7 @@ type Review = {
 
 export default function Home({
   book,
-}: InferGetServerSidePropsType<typeof myServerSideProps>) {
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [reviews, setReviews] = useState<null | Review[]>(null);
 
   const handleGetReviews = () => {
@@ -45,15 +44,20 @@ export default function Home({
   );
 }
 
-const myServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps<{ book: Book }> = async ({
+  req,
+}) => {
   const book = await getBook();
-  if (!book) return redirect("/404");
+  if (!book)
+    return {
+      redirect: {
+        destination: "/404",
+        statusCode: 301,
+      },
+    };
   return {
     props: {
       book,
     },
   };
 };
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) =>
-  await typeSafeSSP(ctx)(myServerSideProps);
