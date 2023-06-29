@@ -1,0 +1,25 @@
+# ignore everything
+**
+
+# but keep:
+# the app
+!public/**
+!src/**
+!.next/**
+!middleware.ts
+
+# tests
+!tests/**
+
+# type definitions
+!generated/**
+!types.d.ts
+
+# config files
+!.env.test
+!.env.production
+!package.json
+!package-lock.json
+!next.config.js
+!tsconfig.json
+!playwright.config.ts

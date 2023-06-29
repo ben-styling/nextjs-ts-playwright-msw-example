@@ -8,6 +8,7 @@
 # testing
 /coverage
 public/mockServiceWorker.js
+test-results/**
 
 # next.js
 /.next/

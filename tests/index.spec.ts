@@ -1,40 +1,83 @@
 import { expect } from "@playwright/test";
 import test from "./next-fixture";
 
-test("book title", async ({ page, port, requestInterceptor, rest }) => {
+test("book title1", async ({ page, goto, mockBook }) => {
   // mock the response of the server-side request
-  requestInterceptor.use(
-    rest.get(`https://jsonkeeper.com/b/AFRW`, (req, res, ctx) =>
-      res(
-        ctx.json({
-          title: "Lord of the Rings",
-          imageUrl: "/lord-of-the-rings.jpg",
-          description:
-            "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
-        })
-      )
-    )
-  );
+  await mockBook({
+    title: "Lord of the Rings",
+    imageUrl: "/lord-of-the-rings.jpg",
+    description:
+      "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
+  });
 
-  await page.goto(`http://localhost:${port}/`);
+  await goto("/");
   const name = await page.innerText("h1");
   expect(name).toBe("Lord of the Rings");
+  await mockBook({
+    title: "Lord of the Rings2",
+    imageUrl: "/lord-of-the-rings.jpg",
+    description:
+      "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
+  });
+  await goto("/");
+  const name2 = await page.innerText("h1");
+  expect(name2).toBe("Lord of the Rings2");
 });
 
-test("reviews", async ({ page, port, requestInterceptor, rest }) => {
+test("book title2", async ({ page, goto, mockBook }) => {
   // mock the response of the server-side request
-  requestInterceptor.use(
-    rest.get(`https://jsonkeeper.com/b/AFRW`, (req, res, ctx) =>
-      res(
-        ctx.json({
-          title: "Lord of the Rings",
-          imageUrl: "/lord-of-the-rings.jpg",
-          description:
-            "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
-        })
-      )
-    )
-  );
+  await mockBook({
+    title: "Lord of the Rings",
+    imageUrl: "/lord-of-the-rings.jpg",
+    description:
+      "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
+  });
+
+  await goto("/");
+  const name = await page.innerText("h1");
+  expect(name).toBe("Lord of the Rings");
+  await mockBook({
+    title: "Lord of the Rings2",
+    imageUrl: "/lord-of-the-rings.jpg",
+    description:
+      "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
+  });
+  await goto("/");
+  const name2 = await page.innerText("h1");
+  expect(name2).toBe("Lord of the Rings2");
+});
+
+test("book title3", async ({ page, goto, mockBook }) => {
+  // mock the response of the server-side request
+  await mockBook({
+    title: "Lord of the Rings",
+    imageUrl: "/lord-of-the-rings.jpg",
+    description:
+      "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
+  });
+
+  await goto("/");
+  const name = await page.innerText("h1");
+  expect(name).toBe("Lord of the Rings");
+  await mockBook({
+    title: "Lord of the Rings2",
+    imageUrl: "/lord-of-the-rings.jpg",
+    description:
+      "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
+  });
+  await goto("/");
+  const name2 = await page.innerText("h1");
+  expect(name2).toBe("Lord of the Rings2");
+});
+
+test("reviews", async ({ page, port: [port], mockBook }) => {
+  // mock the response of the server-side request
+  await mockBook({
+    title: "Lord of the Rings",
+    imageUrl: "/lord-of-the-rings.jpg",
+    description:
+      "The Lord of the Rings is an epic high-fantasy novel written by English author and scholar J. R. R. Tolkien.",
+  });
 
   // mock the response to the client-side request
   await page.route(`http://localhost:${port}/api/reviews`, (route) =>

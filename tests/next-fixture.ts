@@ -1,85 +1,80 @@
 // tests/next-fixture.ts
 import { createServer, Server } from "http";
 import { parse } from "url";
-import { Page, test as base } from "@playwright/test";
+import { test as base } from "@playwright/test";
 import next from "next";
 import path from "path";
 import { AddressInfo } from "net";
 import { rest } from "msw";
-import type { SetupServerApi } from "msw/node";
-// Extend base test with our fixtures.
-const test = base.extend<{
-  port: string;
-  requestInterceptor: SetupServerApi;
-  rest: typeof rest;
-  enablePreviewMode: (
-    page: Page,
-    base?: string
-  ) => Promise<() => Promise<void>>;
-}>({
-  // the port function is the same as before
+import { SetupServer } from "msw/node";
+import { createWorker, MockServiceWorker } from "playwright-msw";
+
+const test = base.extend<
+  {
+    requestInterceptor: SetupServer;
+    rest: typeof rest;
+    goto: (pathname: string) => Promise<void>;
+    mockBook: (book: any) => Promise<void>;
+    worker: MockServiceWorker;
+  },
+  { port: [string, SetupServer] }
+>({
+  mockBook: async ({ port: [port, requestInterceptor] }, use) => {
+    const mockBook = async (book: any) => {
+      requestInterceptor.use(
+        rest.get(`*/b/AFRW`, (_req, res, ctx) => res.once(ctx.json(book)))
+      );
+    };
+    await use(mockBook);
+  },
+  worker: [
+    async ({ page }, use) => {
+      const server = await createWorker(page);
+      await use(server);
+    },
+    { scope: "test", auto: true },
+  ],
   port: [
     async ({}, use) => {
-      const app = next({
-        dev: false,
-        dir: path.resolve(__dirname, ".."),
-      });
-      await app.prepare();
-      const handle = app.getRequestHandler();
-      // start next server on arbitrary port
-      const server: Server = await new Promise((resolve) => {
-        const server = createServer((req, res) => {
-          const parsedUrl = parse(req.url, true);
+      const { setupServer } = await import("msw/node");
+      const servers: [Server, SetupServer] = await new Promise((resolve) => {
+        const server = createServer();
+        const requestInterceptor = setupServer();
+        requestInterceptor.listen({ onUnhandledRequest: "bypass" });
+        server.addListener("request", async (req, res) => {
+          const port = (server.address() as AddressInfo).port;
+          const app = next({
+            dev: false,
+            dir: path.resolve(__dirname, ".."),
+            hostname: "localhost",
+            port,
+          });
+          await app.prepare();
+          const handle = app.getRequestHandler();
+          // if (typeof req.url !== 'string') throw new Error('url is not a string');
+          // this is deprecated, but nextjs requires this format
+          // https://nextjs.org/docs/pages/building-your-application/configuring/custom-server
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const parsedUrl = parse(req.url!, true);
           handle(req, res, parsedUrl);
         });
-        server.listen((error) => {
-          if (error) throw error;
-          resolve(server);
-        });
+        server.listen(() => resolve([server, requestInterceptor]));
       });
-      const port = String((server.address() as AddressInfo).port);
-      // provide port to tests
-      await use(port);
+      const port = (servers[0].address() as AddressInfo).port;
+      const requestInterceptor = servers[1];
+      await use([String(port), requestInterceptor]);
+      servers[0].close();
+      servers[1].close();
     },
-    {
-      //@ts-ignore
-      scope: "worker",
-      auto: true,
-    },
-  ],
-  requestInterceptor: [
-    async ({}, use) => {
-      // Import requestInterceptor from the built app so we
-      // can attach attach our mocks to it from each test
-      const { requestInterceptor } = require("../.next/server/pages/_app");
-      await use(requestInterceptor);
-    },
-    {
-      //@ts-ignore
-      scope: "worker",
-    },
+    { scope: "worker" },
   ],
   rest,
-  enablePreviewMode: [
-    async ({ port }, use) => {
-      async function enablePreviewMode(
-        page,
-        base = `http://localhost:${port}`
-      ) {
-        await page.goto(`${base}/api/preview`);
-
-        return async function disablePreviewMode() {
-          await page.goto(`${base}/api/preview?clear`);
-        };
-      }
-
-      await use(enablePreviewMode);
-    },
-    {
-      //@ts-ignore
-      scope: "worker",
-    },
-  ],
+  goto: async ({ port: [port], page }, use) => {
+    const goto = async (pathname: string) => {
+      await page.goto(`http://localhost:${port}${pathname}`);
+    };
+    await use(goto);
+  },
 });
 // this "test" can be used in multiple test files,
 // and each of them will get the fixtures.

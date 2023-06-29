@@ -6,16 +6,20 @@
     "build": "next build",
     "start": "next start",
     "test": "playwright test",
-    "test:skipbuild": "SKIP_BUILD=1 playwright test"
+    "test:skipbuild": "SKIP_BUILD=1 playwright test",
+    "test:docker": "DOCKER_BUILDKIT=1 docker build --target test -t runner-test-image . && mkdir -p test-results && docker run --init --ipc=host --network=host --mount type=bind,source=\"$(pwd)\"/test-results,target=/app/test-results runner-test-image:latest"
   },
   "license": "MIT",
   "dependencies": {
-    "msw": "^0.29.0",
-    "next": "latest",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "msw": "^1.2.2",
+    "next": "12.3.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.12.2"
+    "@playwright/test": "1.35.1",
+    "@types/react": "17.0.2",
+    "typescript": "4.9.5",
+    "playwright-msw": "^2.2.1"
   }
 }
